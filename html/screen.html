@@ -1,0 +1,71 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-nn4HPE8lTHyVtfCBi5yW9d20FjT8BJwUXyWZT9InLYax14RDjBj46LmSztkmNP9w" crossorigin="anonymous"/>
+
+    <script type='text/javascript'>
+    const controlSessionId = '';
+    const controlSessionApiKey = '';
+    const controlSessionToken = '';
+    const viewerSessions = [];
+    let numberOfActiveSessions = 0;
+
+    const updateState = () => {
+      const numberSpan = document.querySelector('#numberOfSessions');
+      numberSpan.innerHTML = `${numberOfActiveSessions}`;
+    };
+
+    window.onload = () => {
+      const button = document.querySelector('#connectSession');
+      const session = OT.initSession(controlSessionApiKey, controlSessionId);
+
+      button.onclick = () => {
+        session.connect(controlSessionToken, (error) => {
+          if (error) {
+            console.log('error', error);
+            return;
+          }
+          console.log('connected');
+          document.querySelector('#controlSessionStatus').innerHTML = 'Connected';
+        })
+
+        session.on('signal', (event) => {
+          const sessionInfo = JSON.parse(event.data);
+          console.log('connecting to: ', sessionInfo);
+          const newSession = OT.initSession(sessionInfo.apiKey, sessionInfo.sessionId);
+          viewerSessions.push(newSession);
+          newSession.connect(sessionInfo.token, (error) => {
+            if (error) {
+              console.log('error', error);
+              return
+            }
+            console.log('connected to: ', sessionInfo.sessionId);
+            numberOfActiveSessions++;
+            updateState();
+          });
+          newSession.on('sessionDisconnected', () => {
+            console.log('!!! Session Disconnected');
+            numberOfActiveSessions--;
+            updateState();
+          });
+          newSession.on('connectionCreated', () => {
+            console.log('connection created');
+          });
+          newSession.on('connectionDestroyed', () => {
+            console.log('connection destroyed');
+          });
+          newSession.on('signal', (message) => {
+            console.log('signal received: ', message);
+          });
+        });
+      }
+    }
+    </script>
+  </head>
+
+  <body>
+    <button class='pure-button' id='connectSession'>Connect To Control Session</button><span id='controlSessionStatus'>Disconnected</span><br/>
+    Number of active sessions: <span id="numberOfSessions">0</span>
+    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
+    <script src="http://localhost:35729/livereload.js?snipver=1&mindelay=2000"></script>
+  </body>
+</html>

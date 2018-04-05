@@ -1,0 +1,17 @@
+{
+  "name": "test_ted_sessions",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "run": "livereload | nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.16.3",
+    "opentok": "^2.6.2"
+  },
+  "devDependencies": {
+    "livereload": "^0.7.0",
+    "nodemon": "^1.17.3"
+  }
+}
